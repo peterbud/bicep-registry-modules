@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.31.92.45157",
-      "templateHash": "2810003323744846464"
+      "templateHash": "5385061610009684829"
     },
     "name": "Azure SQL Servers",
     "description": "This module deploys an Azure SQL Server.",
@@ -1799,7 +1799,7 @@
       "$ref": "#/definitions/serverExternalAdministratorType",
       "nullable": true,
       "metadata": {
-        "description": "Conditional. The Azure Active Directory (AAD) administrator authentication. Required if no `administratorLogin` & `administratorLoginPassword` is provided."
+        "description": "Conditional. The Azure Active Directory administrator of the server. Required if no `administratorLogin` & `administratorLoginPassword` is provided."
       }
     },
     "federatedClientId": {
@@ -4398,11 +4398,11 @@
         },
         "mode": "Incremental",
         "parameters": {
-          "serverName": {
-            "value": "[parameters('name')]"
-          },
           "name": {
             "value": "[parameters('virtualNetworkRules')[copyIndex()].name]"
+          },
+          "serverName": {
+            "value": "[parameters('name')]"
           },
           "ignoreMissingVnetServiceEndpoint": {
             "value": "[tryGet(parameters('virtualNetworkRules')[copyIndex()], 'ignoreMissingVnetServiceEndpoint')]"
@@ -5404,6 +5404,109 @@
               "value": "[resourceGroup().name]"
             }
           }
+        }
+      },
+      "dependsOn": [
+        "server"
+      ]
+    },
+    "server_administrators": {
+      "condition": "[not(equals(parameters('administrators'), null()))]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[format('{0}-Sql-Server-Administrators', uniqueString(deployment().name, parameters('location')))]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "serverName": {
+            "value": "[parameters('name')]"
+          },
+          "name": {
+            "value": "[coalesce(tryGet(parameters('administrators'), 'name'), 'activeDirectory')]"
+          },
+          "login": {
+            "value": "[parameters('administrators').login]"
+          },
+          "sid": {
+            "value": "[parameters('administrators').sid]"
+          },
+          "tenantId": {
+            "value": "[tryGet(parameters('administrators'), 'tenantId')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.31.92.45157",
+              "templateHash": "17842236118742497616"
+            },
+            "name": "Azure SQL Server Administrators",
+            "description": "This module deploys an Azure SQL Server Administrators resource.",
+            "owner": "Azure/module-maintainers"
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Required. The name of the administrators resource."
+              }
+            },
+            "serverName": {
+              "type": "string",
+              "metadata": {
+                "description": "Conditional. The Name of SQL Server. Required if the template is used in a standalone deployment."
+              }
+            },
+            "administratorType": {
+              "type": "string",
+              "defaultValue": "ActiveDirectory",
+              "metadata": {
+                "description": "Optional. Type of the server administrator."
+              }
+            },
+            "login": {
+              "type": "string",
+              "metadata": {
+                "description": "Required. Login name of the server administrator."
+              }
+            },
+            "sid": {
+              "type": "string",
+              "minLength": 36,
+              "maxLength": 36,
+              "metadata": {
+                "description": "Required. SID (object ID) of the server administrator."
+              }
+            },
+            "tenantId": {
+              "type": "string",
+              "defaultValue": "[subscription().tenantId]",
+              "minLength": 36,
+              "maxLength": 36,
+              "metadata": {
+                "description": "Optional. Tenant ID of the administrator."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Sql/servers/administrators",
+              "apiVersion": "2023-08-01-preview",
+              "name": "[format('{0}/{1}', parameters('serverName'), parameters('name'))]",
+              "properties": {
+                "administratorType": "[parameters('administratorType')]",
+                "login": "[parameters('login')]",
+                "sid": "[parameters('sid')]",
+                "tenantId": "[parameters('tenantId')]"
+              }
+            }
+          ]
         }
       },
       "dependsOn": [

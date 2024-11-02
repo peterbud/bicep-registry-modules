@@ -44,20 +44,21 @@ module nestedDependencies 'dependencies.bicep' = {
 // Test Execution //
 // ============== //
 
-module testDeployment '../../../main.bicep' = {
-  scope: resourceGroup
-  name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}'
-  params: {
-    name: '${namePrefix}-${serviceShort}'
-    location: resourceLocation
-    administrators: {
-      azureADOnlyAuthentication: true
-      login: 'myspn'
-      sid: nestedDependencies.outputs.managedIdentityPrincipalId
-      principalType: 'Application'
+module testDeployment '../../../main.bicep' = [
+  for iteration in ['init', 'idem']: {
+    scope: resourceGroup
+    name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
+    params: {
+      name: '${namePrefix}-${serviceShort}'
+      location: resourceLocation
+      // administratorLogin: 'adminUserName'
+      // administratorLoginPassword: password
+      administrators: {
+        azureADOnlyAuthentication: true
+        login: 'dep-${namePrefix}-msi-${serviceShort}'
+        sid: nestedDependencies.outputs.managedIdentityPrincipalId
+        principalType: 'Application'
+      }
     }
   }
-  dependsOn: [
-    nestedDependencies
-  ]
-}
+]

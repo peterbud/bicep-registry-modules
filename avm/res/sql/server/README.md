@@ -23,6 +23,7 @@ This module deploys an Azure SQL Server.
 | `Microsoft.Network/privateEndpoints` | [2023-11-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-11-01/privateEndpoints) |
 | `Microsoft.Network/privateEndpoints/privateDnsZoneGroups` | [2023-11-01](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Network/2023-11-01/privateEndpoints/privateDnsZoneGroups) |
 | `Microsoft.Sql/servers` | [2023-08-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Sql/servers) |
+| `Microsoft.Sql/servers/administrators` | [2023-08-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Sql/servers/administrators) |
 | `Microsoft.Sql/servers/auditingSettings` | [2023-08-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Sql/servers/auditingSettings) |
 | `Microsoft.Sql/servers/databases` | [2023-08-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Sql/servers/databases) |
 | `Microsoft.Sql/servers/databases/backupLongTermRetentionPolicies` | [2023-05-01-preview](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Sql/2023-05-01-preview/servers/databases/backupLongTermRetentionPolicies) |
@@ -71,7 +72,7 @@ module server 'br/public:avm/res/sql/server:<version>' = {
     // Non-required parameters
     administrators: {
       azureADOnlyAuthentication: true
-      login: 'myspn'
+      login: 'dep-msi-sqlsadmin'
       principalType: 'Application'
       sid: '<sid>'
     }
@@ -100,7 +101,7 @@ module server 'br/public:avm/res/sql/server:<version>' = {
     "administrators": {
       "value": {
         "azureADOnlyAuthentication": true,
-        "login": "myspn",
+        "login": "dep-msi-sqlsadmin",
         "principalType": "Application",
         "sid": "<sid>"
       }
@@ -127,7 +128,7 @@ param name = 'sqlsadmin'
 // Non-required parameters
 param administrators = {
   azureADOnlyAuthentication: true
-  login: 'myspn'
+  login: 'dep-msi-sqlsadmin'
   principalType: 'Application'
   sid: '<sid>'
 }
@@ -1856,7 +1857,7 @@ param vulnerabilityAssessmentsObj = {
 | :-- | :-- | :-- |
 | [`administratorLogin`](#parameter-administratorlogin) | string | The administrator username for the server. Required if no `administrators` object for AAD authentication is provided. |
 | [`administratorLoginPassword`](#parameter-administratorloginpassword) | securestring | The administrator login password. Required if no `administrators` object for AAD authentication is provided. |
-| [`administrators`](#parameter-administrators) | object | The Azure Active Directory (AAD) administrator authentication. Required if no `administratorLogin` & `administratorLoginPassword` is provided. |
+| [`administrators`](#parameter-administrators) | object | The Azure Active Directory administrator of the server. Required if no `administratorLogin` & `administratorLoginPassword` is provided. |
 | [`primaryUserAssignedIdentityId`](#parameter-primaryuserassignedidentityid) | string | The resource ID of a user assigned identity to be used by default. Required if "userAssignedIdentities" is not empty. |
 
 **Optional parameters**
@@ -1912,7 +1913,7 @@ The administrator login password. Required if no `administrators` object for AAD
 
 ### Parameter: `administrators`
 
-The Azure Active Directory (AAD) administrator authentication. Required if no `administratorLogin` & `administratorLoginPassword` is provided.
+The Azure Active Directory administrator of the server. Required if no `administratorLogin` & `administratorLoginPassword` is provided.
 
 - Required: No
 - Type: object

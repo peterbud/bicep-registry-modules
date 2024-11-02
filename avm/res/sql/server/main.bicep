@@ -54,7 +54,7 @@ param securityAlertPolicies securityAlerPolicyType[] = []
 @description('Optional. The keys to configure.')
 param keys keyType[] = []
 
-@description('Conditional. The Azure Active Directory (AAD) administrator authentication. Required if no `administratorLogin` & `administratorLoginPassword` is provided.')
+@description('Conditional. The Azure Active Directory administrator of the server. Required if no `administratorLogin` & `administratorLoginPassword` is provided.')
 param administrators serverExternalAdministratorType?
 
 @description('Optional. The Client id used for cross tenant CMK scenario.')
@@ -404,8 +404,8 @@ module server_virtualNetworkRules 'virtual-network-rule/main.bicep' = [
   for (virtualNetworkRule, index) in virtualNetworkRules: {
     name: '${uniqueString(deployment().name, location)}-Sql-VirtualNetworkRules-${index}'
     params: {
-      serverName: server.name
       name: virtualNetworkRule.name
+      serverName: server.name
       ignoreMissingVnetServiceEndpoint: virtualNetworkRule.?ignoreMissingVnetServiceEndpoint
       virtualNetworkSubnetId: virtualNetworkRule.virtualNetworkSubnetId
     }
@@ -483,6 +483,29 @@ module server_audit_settings 'audit-settings/main.bicep' = if (auditSettings != 
     queueDelayMs: auditSettings.?queueDelayMs
     retentionDays: auditSettings.?retentionDays
     storageAccountResourceId: auditSettings.?storageAccountResourceId
+  }
+}
+
+// resource AADOnlyAuthentication 'Microsoft.Sql/servers/azureADOnlyAuthentications@2023-08-01-preview' = if (administrators.?azureADOnlyAuthentication == true) {
+//   name: name
+//   parent: server
+//   properties: {
+//     azureADOnlyAuthentication: true
+//   }
+//   // dependsOn: [
+//   //   server_administrators
+//   // ]
+// }
+
+module server_administrators 'administrators/main.bicep' = if (administrators != null) {
+  name: '${uniqueString(deployment().name, location)}-Sql-Server-Administrators'
+  params: {
+    serverName: server.name
+    name: administrators.?name ?? 'activeDirectory'
+    // administratorType: administrators.?administratorType
+    login: administrators!.login
+    sid: administrators!.sid
+    tenantId: administrators.?tenantId
   }
 }
 

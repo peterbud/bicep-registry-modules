@@ -1,0 +1,71 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.31.92.45157",
+      "templateHash": "17842236118742497616"
+    },
+    "name": "Azure SQL Server Administrators",
+    "description": "This module deploys an Azure SQL Server Administrators resource.",
+    "owner": "Azure/module-maintainers"
+  },
+  "parameters": {
+    "name": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. The name of the administrators resource."
+      }
+    },
+    "serverName": {
+      "type": "string",
+      "metadata": {
+        "description": "Conditional. The Name of SQL Server. Required if the template is used in a standalone deployment."
+      }
+    },
+    "administratorType": {
+      "type": "string",
+      "defaultValue": "ActiveDirectory",
+      "metadata": {
+        "description": "Optional. Type of the server administrator."
+      }
+    },
+    "login": {
+      "type": "string",
+      "metadata": {
+        "description": "Required. Login name of the server administrator."
+      }
+    },
+    "sid": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36,
+      "metadata": {
+        "description": "Required. SID (object ID) of the server administrator."
+      }
+    },
+    "tenantId": {
+      "type": "string",
+      "defaultValue": "[subscription().tenantId]",
+      "minLength": 36,
+      "maxLength": 36,
+      "metadata": {
+        "description": "Optional. Tenant ID of the administrator."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Sql/servers/administrators",
+      "apiVersion": "2023-08-01-preview",
+      "name": "[format('{0}/{1}', parameters('serverName'), parameters('name'))]",
+      "properties": {
+        "administratorType": "[parameters('administratorType')]",
+        "login": "[parameters('login')]",
+        "sid": "[parameters('sid')]",
+        "tenantId": "[parameters('tenantId')]"
+      }
+    }
+  ]
+}

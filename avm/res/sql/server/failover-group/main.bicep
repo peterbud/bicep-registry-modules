@@ -27,7 +27,7 @@ resource server 'Microsoft.Sql/servers@2023-08-01' existing = {
 }
 
 @description('Optional. Tags of the resource.')
-param tags object?
+param tags resourceInput<'Microsoft.Sql/servers/failoverGroups@2023-08-01'>.tags?
 
 // https://stackoverflow.com/questions/78337117/azure-sql-failover-group-fails-on-second-run
 // https://github.com/Azure/bicep-types-az/issues/2153

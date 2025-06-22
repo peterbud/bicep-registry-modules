@@ -129,7 +129,7 @@ param zoneRedundant bool = true
 // END OF DATABASE PROPERTIES
 
 @description('Optional. Tags of the resource.')
-param tags object?
+param tags resourceInput<'Microsoft.Sql/servers/databases@2023-08-01'>.tags?
 
 @description('Optional. Location for all resources.')
 param location string = resourceGroup().location
